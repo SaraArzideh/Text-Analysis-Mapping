@@ -12,8 +12,8 @@ co_occurrent_terms = {
     'human factors': ['human factors', 'Human factors', 'human factor', 'Human factor'],
     #'usability': ['usability', 'Usability'],
     'human-computer interaction': ['human-computer interaction', 'human computer interaction', 'human computer', 'human-computer','Human computer'],
-    'user centered design': ['user centered design', 'User centered',  'user centered', 'user-centered', 'user centred', 'user-centred', 'User-centric',  'user-centric', 'User centeric',  'user centric', 'User centered care','user centered care'],
-    'perceived ease of use': ['perceived ease of use','perceived ease', 'Perceived ease', 'ease of use', 'Ease of use'],
+    #'user centered design': ['user centered design', 'User centered',  'user centered', 'user-centered', 'user centred', 'user-centred', 'User-centric',  'user-centric', 'User centeric',  'user centric', 'User centered care','user centered care'],
+    'perceived ease of use': ['perceived ease of use','perceived ease', 'Perceived ease', 'ease of use', 'Ease of use', 'Ese of Use'],
     'perceived usefulness':['perceived usefulness', 'Perceived usefulness', 'usefulness', 'Usefulness'],
     'reliability':['reliability','Reliability', 'reliable',  'reliabilities'],
     'health behaviour change':['health behaviour change', 'Health behaviour change', 'health behavior change', 'behaviour change', 'behavior change'],
@@ -45,10 +45,12 @@ co_occurrent_terms = {
 
 # Function to normalize terms
 def normalize_term(term):
+    term_lower = term.lower()
     for key, values in co_occurrent_terms.items():
-        if term in values:
+        if term_lower in [v.lower() for v in values]:
             return key
-    return term
+    return None
+
 #Step3: Analyzing the co-occurrences of terms and concepts
 # Creating an empty network graph
 G = nx.Graph()
@@ -60,12 +62,14 @@ for index, row in df.iterrows():
     else:
         concepts = []
 
-    # Extracting terms from Title, Abstract, and Author Keywords and normalize them
-    terms = [normalize_term(t) for t in row['Title'].split() + row['Abstract'].split() + str(row['Author Keywords']).split()]
+    # Extracting terms from Title, Abstract, and Author Keywords
+    # Tokenizing and normalizing terms
+    tokens = row['Title'].split() + row['Abstract'].split() + str(row['Author Keywords']).split()
+    normalized_terms = [normalize_term(t) for t in tokens if normalize_term(t)] # Removing None values
     
     # Iterating over each concept and term pair and adding them to the graph
     for concept in concepts:
-        for term in terms:
+        for term in normalized_terms:
             if term in co_occurrent_terms:  # Checking if term is one of the co-occurrent terms
                 if G.has_edge(concept, term):
                     G[concept][term]['weight'] += 1
@@ -78,8 +82,22 @@ for index, row in df.iterrows():
 
 
 #Step6: Visualizing the network
-plt.figure(figsize=(12, 12))
-pos = nx.spring_layout(G, k=0.1)  # k regulates the distance between nodes
-nx.draw(G, pos, with_labels=True, node_size=500, node_color="lightblue", font_size=8)
+# Node size based on degree
+node_size = [100 * G.degree(node) for node in G.nodes()]
+
+# Node color based on degree
+node_color = [G.degree(node) for node in G.nodes()]
+
+# Edge width based on weight
+edge_width = [0.15 * G[u][v]['weight'] for u, v in G.edges()]
+
+# Using a layout to spread nodes apart
+pos = nx.spring_layout(G, k=0.15, iterations=5)
+
+# Draw the network
+plt.figure(figsize=(15, 15))
+pos = nx.spring_layout(G, k=0.15)  # k regulates the distance between nodes
+nx.draw(G, pos, with_labels=True, node_size=node_size, node_color=node_color,
+        width=edge_width, edge_color='grey', alpha=0.4, cmap=plt.cm.Blues, font_size=10)
 plt.title("Clustered Network of Co-occurrent Terms")
 plt.show()
