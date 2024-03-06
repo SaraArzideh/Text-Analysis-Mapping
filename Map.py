@@ -43,6 +43,28 @@ co_occurrent_terms = {
     'user satisfaction': ['user satisfaction', 'User satisfaction', 'satisfaction', 'Satisfaction', 'Patient satisfaction', 'patient satisfaction'],
 }
 
+# Initialize a dictionary to count frequencies
+term_frequencies = {key: 0 for key in co_occurrent_terms}
+
+# Function to count term frequencies
+def count_term_frequencies(row, term_frequencies):
+    for term, variations in co_occurrent_terms.items():
+        if any(var.lower() in row.lower() for var in variations):
+            term_frequencies[term] += 1
+
+# Iterate over DataFrame and count frequencies
+for index, row in df.iterrows():
+    # Concatenating 'Title', 'Abstract', and 'Author Keywords' for each row
+    concatenated_text = str(row['Title']) + " " + str(row['Abstract']) + " " + str(row['Author Keywords'])
+    count_term_frequencies(concatenated_text, term_frequencies)
+
+# Convert the frequencies dictionary to a DataFrame
+freq_df = pd.DataFrame(list(term_frequencies.items()), columns=['Term', 'Frequency'])
+
+# Saving the frequencies to a CSV file
+freq_df.to_csv('term_frequencies.csv', index=False)
+
+
 # Function to normalize terms
 def normalize_term(term):
     term_lower = term.lower()
@@ -66,7 +88,11 @@ for index, row in df.iterrows():
     # Tokenizing and normalizing terms
     tokens = row['Title'].split() + row['Abstract'].split() + str(row['Author Keywords']).split()
     normalized_terms = [normalize_term(t) for t in tokens if normalize_term(t)] # Removing None values
-    
+ 
+    # Debugging print
+    #print(f"Row {index}: Extracted Terms - {normalized_terms}")
+
+#Step4: Building a network with NetworkX
     # Iterating over each concept and term pair and adding them to the graph
     for concept in concepts:
         for term in normalized_terms:
@@ -76,7 +102,9 @@ for index, row in df.iterrows():
                 else:
                     G.add_edge(concept, term, weight=1)
 
-#Step4: Building a network with NetworkX
+
+# Exporting the network to a GEXF file
+nx.write_gexf(G, 'network_graph.gexf')
 
 #Step5: Creating clusters based on concepts
 
@@ -92,12 +120,12 @@ node_color = [G.degree(node) for node in G.nodes()]
 edge_width = [0.15 * G[u][v]['weight'] for u, v in G.edges()]
 
 # Using a layout to spread nodes apart
-pos = nx.spring_layout(G, k=0.15, iterations=5)
+pos = nx.spring_layout(G, k=0.15, iterations=20)
 
 # Draw the network
 plt.figure(figsize=(15, 15))
 pos = nx.spring_layout(G, k=0.15)  # k regulates the distance between nodes
 nx.draw(G, pos, with_labels=True, node_size=node_size, node_color=node_color,
-        width=edge_width, edge_color='grey', alpha=0.4, cmap=plt.cm.Blues, font_size=10)
+        width=edge_width, edge_color='grey', alpha=0.7, cmap=plt.cm.Blues, font_size=10)
 plt.title("Clustered Network of Co-occurrent Terms")
 plt.show()
