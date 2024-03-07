@@ -39,7 +39,6 @@ co_occurrent_terms = {
     'healthcare disparities':['healthcare disparities', 'Healthcare disparities', 'disparities', 'Disparities', 'disparity', 'Disparity', 'Health care disparities', 'health care disparities', 'Health disparities', 'health disparities', 'digital disparities', 'Digital disparities'],
     #'sustainability' :['sustainability', 'Sustainability',  'sustainable',  'Sustainable'],
     'human factors':[ 'human factors', 'Human factors', 'human factor', 'Human factor'],
-    #'usability': ['usability', 'Usability'],
     'user satisfaction': ['user satisfaction', 'User satisfaction', 'satisfaction', 'Satisfaction', 'Patient satisfaction', 'patient satisfaction'],
 }
 
@@ -111,7 +110,7 @@ nx.write_gexf(G, 'network_graph.gexf')
 
 #Step6: Visualizing the network
 # Node size based on degree
-node_size = [100 * G.degree(node) for node in G.nodes()]
+node_size = [150 * G.degree(node) for node in G.nodes()]
 
 # Node color based on degree
 node_color = [G.degree(node) for node in G.nodes()]
@@ -120,12 +119,22 @@ node_color = [G.degree(node) for node in G.nodes()]
 edge_width = [0.15 * G[u][v]['weight'] for u, v in G.edges()]
 
 # Using a layout to spread nodes apart
-pos = nx.spring_layout(G, k=0.15, iterations=20)
+pos = nx.spring_layout(G, k=0.2, iterations=20)
 
 # Draw the network
-plt.figure(figsize=(15, 15))
-pos = nx.spring_layout(G, k=0.15)  # k regulates the distance between nodes
+plt.figure(figsize=(16, 15))
+pos = nx.spring_layout(G, k=0.2)  # k regulates the distance between nodes
 nx.draw(G, pos, with_labels=True, node_size=node_size, node_color=node_color,
-        width=edge_width, edge_color='grey', alpha=0.7, cmap=plt.cm.Blues, font_size=10)
+        width=edge_width, edge_color='grey', alpha=0.7, cmap=plt.cm.Blues, font_size=13)
 plt.title("Clustered Network of Co-occurrent Terms")
 plt.show()
+
+#Step7 Edges_data file
+# Extracting edges and their weights from the graph 'G'
+edges_data = [(u, v, d['weight']) for u, v, d in G.edges(data=True)]
+
+# Creating a DataFrame for edges and weights
+edges_df = pd.DataFrame(edges_data, columns=['Source', 'Target', 'Weight'])
+
+# Saving Edges & weights of Nodes
+edges_df.to_csv('network_edges.csv', index=False)

@@ -15,5 +15,4 @@ venv/
 .env/
 
 # Additional files and folders to ignore
-.DS_Store   # For macOS users
-.idea/      # For PyCharm project settings
+*.gexf
