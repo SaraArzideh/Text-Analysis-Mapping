@@ -1,6 +1,6 @@
 # Research Text Analytics Toolkit
 ## Overview
-This repository and previous three Text-Analysis repositories, contain a collection of Python scripts developed for textual analysis and concept mining of research data. It includes natural language processing (NLP), co-occurrence analysis, citation trends over time, and network visualization of key terms from scientific research. The project is structured to help researchers analyze and visualize large datasets by cleaning, tokenizing, filtering, and applying thesaurus-based standardization to extract useful insights from research articles.
+This repository and three previous Text-Analysis toolkits: Data-Preparing, Trends-Over-Time, and Network-Insights repositories, contain a collection of Python scripts developed for textual analysis and concept mining of research data. They include natural language processing (NLP), co-occurrence analysis, citation trends over time, and network visualization of key terms from scientific research. The project is published to help researchers analyze and visualize datasets by cleaning, tokenizing, filtering, and applying thesaurus-based standardization to extract useful insights from research articles.
 
 The methods used are tailored to perform concept extraction, analyze relationships, and visualize data trends and keyword clusters based on co-occurrences in research texts.
 
